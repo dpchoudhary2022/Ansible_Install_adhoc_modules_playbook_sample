@@ -1,0 +1,307 @@
+------------------------------Ansible-------------------------------------------------------
+How to Install and Configure Ansible on Amazon Linux on AWS
+
+Ansible is an open source IT Automation tool that automates application deployment, infrastructure  service orchestration, cloud provisioning and many more. It uses YAML files or playbooks at run time. In this guide, you will learn how to install and configure Ansible on Amazon Linux 2 on AWS.
+
+Ansible uses push mechanism that’s why it doesn’t require any agent on nodes. Whereas puppet and chef configuration management tools uses pull mechanism and requires agents to be installed on nodes.
+
+Advantages of Ansible
+Although there are various advantages of using Ansible in your infra but below are few and important advantages.
+
+Agentless
+No need to install nodes on remote servers
+Totally rely on SSH
+Various big organisations uses Ansible such as  Apple, NASA, Juniper etc.
+
+###########################################################################################################################
+create 3 ec2-instance (amazon-linux image)named as-  
+ansible server,node1,node2
+while creating all ec2 instance write in step-3 under user-date- as text select
+and write- #!/bin/bash
+           sudo su
+           yum update -y
+
+vpc-default
+subnet-choose 1a avalability zone ap south 
+auto-ass.public ip-enable
+
+
+
+step-6- ssh and http - anwhere
+###################################################################################################################
+
+# only on ansible server not in nodes
+1-Install Ansible using EPEL Repository
+
+$ wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+
+$ ls # it shows epel relese downloaded link copy paste in next to install
+
+2-Next, Install epel repository using yum.
+$ sudo yum install epel-release-latest-7.noarch.rpm -y
+
+3-Update epel repository as follows
+$ yum update -y
+
+4-Now install all individual packages inside the repository along with ansible.
+$ sudo yum install python python-level python-pip openssl ansible -y
+
+5- check ansible version installed
+$ ansible --version
+
+6-Managing inventory file on Master
+A default hosts file is created while ansible installation. To manage your infrastructure you need to make entries of 
+your available server machines in this hosts file.
+Insert client machines ip address into the inventory file:
+
+$ sudo  vi /etc/ansible/hosts
+
+[demo]
+private ip of node1          # here demo is group name
+private ip of node2
+
+save/exit vi now
+
+7-
+vi /etc/ansible/ansible.cfg
+
+uncomment the- 
+#inventory = /etc/ansible/hosts  --remove # from starting
+#sudo user = root  -- remove #
+
+save/exit vi now
+##############################################################################################################################3
+
+in ansible server and node1 & node2
+
+8- to create user/password in all ec2-machine
+
+$ adduser ansible #(this is(ansible) user name /any name taken)
+$ passwd ansible # (again write username as ansible)/ Paasword for this(ansible) user in next line when it ask /# after passwd user name (ansible ) is written 
+NOW IT ASKS PASSWORD 
+ENTER NEW PASSWORD 
+
+9-
+$ su - ansible # to enter/login as ansible user in all ec2
+
+$ exit --- to come back on ec2-user 
+
+10- Grant admin access to created user for master & client machines. You need login as root to make changes here.
+    We have added ansible user in sudoers file and enable authentication without password each time.
+$  visudo  ## note- no space here
+
+Here we see below file so add ansible user permission below this line
+
+# allow root to run any commands anywhere
+root    ALL(ALL)          ALL
+ansible ALL(ALL)    NOPASSD:(ALL)
+
+OR CHECK WITH VI
+
+ansible ALL=(ALL)  NOPASSWD:ALL
+
+
+save/exit vi now
+
+
+11-now do this for all ec2 machine one by one as a root user login. not login as ansible user in all ec2 machine 
+
+
+[root@ec2-user] $ vi /etc/ssh/sshd_config
+
+uncomment below file under #Authentication 
+#PermitRootLogin Yes  ---- remove # on starting
+
+now under- to disabled tunneled clear text password, changes to no here- 
+#PaaswordAuthentication Yes ----------remove # from starting
+                   and
+PaawordAuthentication No --------here Add # in staerting to comment this line
+
+12-Restart sshd service.
+now run below command in all  ec2-machine
+
+$ service sshd restart
+
+###################################################################################################################################
+in ansible server ec2 machine
+$ su - ansible
+$ sudo yum install httpd -y
+$ ssh <private ip node1> # it ask password- so enter the pass- ansible which we create
+# now we are in node1
+#create some file here and check on node1 terminal with login as ansible user(su - ansible) and do $ ls , files shown there
+$ touch file1 file2 file3
+--------------------------------------------------------
+ssh <private ip node2> 
+# now we are in node2
+# similary do above task here and check on terminal of node2 as a ansible user
+
+###################################################################################################################################3
+
+
+in ansible server ec2- machine
+# create keys to avoid password asking every time on ansible user login in all ec2- machine
+
+$ su - ansible ---login as ansible user
+
+# generate public and private keys on client machine.
+$ ssh-keygen  ----press enter many times
+$ ls -a ----it shows .ssh file
+$ cd .ssh/
+$ ls
+# output- id_rsa (this is private key)
+          id_rsa.pub (this is public key)
+
+$ ssh-copy-id ansible@private ip node1  --- here ansible= user which we create # it ask password onetime 
+$ ssh-copy-id ansible@private ip node2
+$ cd .. ( to come out from ansible user)
+#now check it asking for password or not while login in node1 and node2
+
+$ ssh private ip of node1 ( we enter in node1 ,it not asking password)
+# create some file here and check on node1 terminal
+$ exit (to come out from node1)
+$ ssh private ip of node2 ( we enter in node2)
+# create some file and check on node2 terminal
+$ exit 
+#######################################################################################################################
+##########################........... HOST PATTERN..................############################################
+
+
+in ansible server ec2-machine 
+
+$ su - ansible
+$ ansible all --list-hosts  # it shows all hosts/nodes/groups
+
+# to check for 'ansible' user and group 'demo' how many nodes are-
+# ansible demo  --list-hosts
+
+
+$ ansible demo[0] --list-hosts   # for first node
+
+$ ansible demo[1] --list-hosts   # for second node
+
+$ ansible demo[2] --list-hosts   # for third node
+
+$ ansible demo[3] --list-hosts   # for forth node
+
+$ ansible demo[4] --list-hosts   # for fifth node
+
+$ ansible demo[-1] --list-hosts  # for last node
+
+
+
+$ ansible demo[0:1] --list-hosts  # it shows 0 to 1)
+
+$ ansible demo[2:5] --list-hosts  # it shows 3,4,5,6 (note indexing from zero) so 0=1st node,1=2nd node,2=3rd node 
+
+$ ansible demo[0] --list-hosts
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
