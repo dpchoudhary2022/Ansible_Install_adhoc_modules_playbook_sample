@@ -1,0 +1,89 @@
+
+#################################...............ANSIBLE ADHOC COMMANDS...............#######################################
+#################################...............ANSIBLE ADHOC COMMANDS...............#######################################
+
+# Adhoc commands are commands which can be run individually to perform quick function.
+# these commands are not used for configuration management and deployment because these commands are of one time usage.
+# the ansible adhoc commands are uses the /usr/bin/ansible command line tool to automate a single task.
+# IN ADHOC COMMANDS - NO IDEMPOTENCY IT MEANS IT OVERWRITE THE FILES AND CREATE A NEW ONE
+
+1- to check all info. about demo group (here demo group created by me)
+$ ansible demo -a "ls"
+
+2- to check info about all groups/nodes
+$ ansible all -a "ls"
+
+3- to create a file in a group ( here demo group created by me)
+$ ansible demo -a "touch file31"
+
+# CREATE FILE IN all nodes
+$ ansible  all -a "touch file70
+NOTE- IF ABOVE COMMANDS WE RUN AGAIN THEN IT EXECUTES SUCCESSFULLY AND OVERWRITE THE FILES BECAUSE OF NO IDEMPOTENCY
+MPOTE
+4- SHOWS LONG LISTS + HIDDEN FILE FOR demo GROUP 
+$ ansible demo -a "ls -al"
+
+6- INSTALL AND REMOVE ANY PACKAGE
+$ ansible demo -ba "yum install httpd -y"  (HERE ba is equivalent to sudo) whereas b=become and a=argument
+
+        OR
+$ sudo "yum install httpd -y"
+
+$ which httpd (to check istall or not)
+$ ansible demo -ba "yum remove httpd -y"
+
+#######################################################################################################################################
+
+##################............ANSIBLE MODULE.................#################################################################
+Ansible ships with a number of modules called module library that can be executed directly on hosts or through playbooks.
+Ansible modules are stored in - /etc/ansible/hosts  ( this is default location for inventory)
+
+
+1-CREATE A USER
+$ ansible demo -b -m user -a "name=dharm"  (dharm is user name)
+
+2- create a file and copy this file to /tmp directory or any specified location
+$ touch file123
+$ ansible demo -b -m copy -a "src=file123 dest=/tmp"
+
+3- CREATE A FILE AND COPY TO SPECIFIC NODE
+$ touch file99
+$ ansible demo[-1] -b -m copy -a "src=file99 dest=/tmp"  # here ansible is user ,demo is group, -1 is last node
+
+## to check file is present in last node
+
+$ ls /tmp/  
+
+3- create a file and copy to all node
+
+$ touch file88
+
+$ ansible demo -b -m copy -a "src=file88 dest=/tmp"
+
+## to check file is present all node
+
+$ ls /tmp/ 
+
+4- HOW SERVER UNDERSTAND ANY PACKAGES ALREADY INSTALLED
+   setup IS A MODULE WHICH COLLECT/RETURN GIVE INFORMATION ABOUT PACKAGE ARE INSTALLED OR NOT.
+   WHEN WE EXECUTE PLAYBOOK/MODULES THEN SETUP MODULE RUN AND GIVE INFORMATION
+$ ansible demo -m setup
+
+5- it shows ip address details 
+$ ansible demo -m setup -a "filter=*ipv4*"
+
+6- install any package (present=install)
+$ ansible demo -b -m yum -a "pkg=httpd state=present"
+
+7- update a package (latest= update)
+$ ansible demo -b -m yum -a "pkg=httpd state=latest"
+
+8- to start a service any
+$ ansible demo -b -m service -a "name=httpd state=started"
+
+9- unistall a package(absent=uninstall)
+$  ansible demo -b -m yum -a "pkg=httpd state=absent"
+
+
+
+
