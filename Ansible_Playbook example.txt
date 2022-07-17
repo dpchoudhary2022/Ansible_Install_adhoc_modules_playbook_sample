@@ -1,0 +1,84 @@
+#################################..............Ansible Playbook...........############################################################
+#################################..............Ansible Playbook...........############################################################
+
+# Playbook is written in "yaml" format
+# it is commonly used for configuration files.
+# playbook is just lie a file where we write a codes consists of variables,tasks,handlers,files,templates,and roles.
+# each playbook is composed of one or more "modules" in a lists whereas modules are collection of configuration files.
+# playbooks are diveded into many sections such as- 
+       A- target section:- define the host against which playbook task has to be executed (groups/nodes)
+       B- variable section:- define variables such as- (vars=httpd, vars=john)
+       C- task section:- list of all modules that need to be run in an order (all modules are here)
+
+# for ansible every yaml files starts with list
+# each item in the list is list of key-value pairs commonly called dictionary
+# all yaml files have to begin with --- # and end with ... (three dots)/but not mandatory
+# all members of list lines must be begin with same indentation level starting with -
+# extension of playbook files is .yml
+
+--------------------------------------------------------------------------------------------------------------------------------------
+playbook example-1
+
+  vi target.yml
+
+--- # target playbook
+- hosts: demo              # note- before : no space is required
+  user: ansible            # NOTE- after : space is compulsory
+  become: yes
+  connection: ssh
+  gather_facts: yes
+
+
+now save and exit vi editor (esc :wq)
+
+
+now execute the playbook
+
+$ ansible-playbook target.yml
+#############################################################################################################################
+
+playbook-2
+
+vi task.yml
+
+--- # target and task playbook
+- hosts: demo
+  user: ansible
+  become: yes
+  connection:ssh
+  
+  tasks: 
+    - name: Install HTTPD on centos 7
+      action: yum name=httpd state=installed
+
+save and exit vi
+
+and execute the playbook
+$ ansible-palybook task.yml
+
+####################################################################################################################################
+
+playbook example-3
+
+vi vars.yml
+
+--- # my variable playbook
+- hosts: demo
+  user: ansible
+  become: ansible
+  connection: ssh
+
+  vars:
+    pkgname: httpd
+    tasks:
+      - name: Install HTTPD on centos 7
+        action: yum name='{{pkgname}}' state=installed
+
+
+save and exit vi
+
+now execute the playbook
+
+ansible-playbook vars.yml
+
+#########################################################################################################################################
