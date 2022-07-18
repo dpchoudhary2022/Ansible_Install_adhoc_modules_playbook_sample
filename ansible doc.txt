@@ -16,10 +16,10 @@ Various big organisations uses Ansible such as  Apple, NASA, Juniper etc.
 ###########################################################################################################################
 create 3 ec2-instance (amazon-linux image)named as-  
 ansible server,node1,node2
-while creating all ec2 instance write in step-3 under user-date- as text select
+while creating all ec2 instance write in Step 3: Configure Instance Details under-Advanced details:- as text select
 and write- #!/bin/bash
            sudo su
-           yum update -y
+           yum update -y  # for updating the server while creating
 
 vpc-default
 subnet-choose 1a avalability zone ap south 
