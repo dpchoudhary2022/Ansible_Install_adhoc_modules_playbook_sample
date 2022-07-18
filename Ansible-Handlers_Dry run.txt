@@ -1,0 +1,41 @@
+
+######################################.................ANSIBLE HANDLERS AND DRY RUN .................#########################################################
+######################################.................HANDLERS AND DRY RUN.................#########################################################
+
+# handlers is a exectly the same as a tasks but it will be run when called by another tasks
+# handlers are just like a regular tasks in a ansible playbook but are only run if the task contains a notify directive and also indicates that it changed something.
+
+# dry run : check wheather the playbook is formatted correctly.
+
+for example (command)- ansible-playbook handlers.yml --check
+
+note-  to check our (above) playbook is written correctly or not before execute/run use the above command
+###############################################################################################################################################################
+
+handlers playbook example-1 
+
+vi handlers.yml
+
+--- # my handlers playbook sample
+- hosts: demo
+  user: ansible  
+  become: yes
+  connection: ssh
+
+  tasks:
+    - name: Install HTTPD server on centos 7
+      action: yum name=httpd state=installed               #### NOTE:tasks-notify
+      notify: restart HTTPD                                         # AND 
+                                                             ###  handlers-name  
+  handlers:                                                         
+    - name: restart HTTPD                                    ### both must be same then handlers work
+      action: service name=httpd state=restarted
+
+-------------------------------------------------------
+ save and exit vi 
+
+now execute the above playbook by below commands
+
+ansible-playbook handlers.yml
+
+###############################################################################################################################################################

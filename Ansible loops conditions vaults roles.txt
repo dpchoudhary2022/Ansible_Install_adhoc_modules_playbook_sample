@@ -1,0 +1,143 @@
+
+#######################################....................ANSIBLE LOOPS..............######################################################################
+#######################################.....................ANSIBLE LOOPS..............######################################################################
+
+sometimes we need to repeat a task muliple times. in computerr programming this is called loops.common ansible loops includes changing ownership on 
+several files or directories with the file modules, creating multiple users with the user modules and repeating a polling step untill certain results
+is reached.
+
+loops playbook example-
+
+vi loops.yml
+
+--- # my loops playbook
+- hosts: demo
+  user: ansible
+  become: yes
+  connection: ssh
+
+  tasks:
+    - name: add list of users in all nodes
+      user: name='{{item}}' state=present
+      with_items:
+              - dpchoudhary
+              - ram
+              - david
+              - john
+              - anjali
+
+-------------------------------------------------------------------------------------------------------
+save and exit vi editor
+
+and execute the playbook
+
+ansible-playbook loops.yml
+
+###########################################################################################################################################
+
+#########################....................CONDITIONS/VAULTS/ROLES............................###########################################
+#########################....................CONDITIONS/VAULTS/ROLES............................###########################################
+
+# conditions: whenever we have a different different scenarios, we put conditions according to scenario
+
+# when statement: sometimes we want to skip a particular commands on a particular node ( to be use when command in conditions)
+
+we can use linux commands in "condition" with the help of 'command' module ( see playbook below to understand )
+
+vi conditions.yml
+
+
+
+--- # conditions playbook
+- hosts: demo
+  user: ansible
+  become: yes
+  connection: ssh
+
+  tasks:
+    - name: install apche in debian family
+      command: apt-get install apache2 -y
+      when: ansible_os_family == "Debian"
+    - name: install apache in redhat
+      command: yum install httpd -y
+      when: ansible_os_family == "RedHat"
+_________________________________________________________________________________________________
+
+save and exit vi 
+ and now execute the playbook
+
+ansible-playbook conditions.yml
+
+###############################################################################################################################################################
+
+# VAULTS: ansible allows keeping senstive data such as passwords/keys in encrypted files,rather than a plaintext in our playbooks.
+# in vaults latest encrption technique is used named as - AES256 (used by FB/WHATSAPP ETC)
+1- create a new encrypted(password-protected) playbook
+ $ ansible-vault create vault.yml  ## here vault.yml is a playbook name which we want to create and it ask password
+
+2- to edit the encrypted playbook(means write/edit someting in a playbook) /it ask password then vi editor opens
+ $ ansible-vault edit vault.yml  ## ## here vault.yml is a playbook name which we want to edit
+
+3- to change the password of encrpted playbook /it ask old password
+ $ ansible-vaulit rekey vault.yml   ##  ## ## here vault.yml is a playbook name for which we want to change password
+
+4-to encrypt an existing playbook ( if any playbook is alrady created but not have a password or prtected/we can give password by below-
+ $ ansible-vault encrypt target.yml ## here target.yml is playbook name for which we add a password
+
+
+5- to decrypt an existing playbook ( to remove password for a playbook)
+$ ansible-vault decrypt target.yml
+
+_________________________________________________________________________________________________________________________________________________
+
+# ROLES: we can use two techniques for reusing a set of tasks as- 
+1-includes and 
+2-roles
+
+# Roles are good for organising tasks and encapsulating data needed to a acomplish those tasks
+# we can organise a playbook into a directory structure called roles
+
+1- to install tree  ( this is a package )
+$ sudo yum install tree -y
+
+2- $ mkdir -p playbook/roles/webserver/tasks
+3- $ tree
+4- $ cd playbook/ # go inside playbook dir.
+5- $ tree
+
+# create a file under tasks named as main.yml
+6- [ansible@ip-172-31-33-92 playbook]$ touch roles/webserver/tasks/main.yml
+
+# create another file named as master.yml under playbook
+7- [ansible@ip-172-31-33-92 playbook]$ touch master.yml
+
+# NOTE-main.yml and master.yml have same level (check with tree command)
+
+8- vi roles/webserver/tasks/main.yml
+   
+  # inside main.yml 
+
+- name: install apache on RedHat
+  yum pkg=httpd state=latest
+
+save and exit vi
+
+9- vi master.yml
+
+--- #master playbook for webserver
+- hosts: demo
+  user: ansible
+  become: yes
+  connection: ssh
+  
+  roles:
+     - webserver
+
+save and exit vi
+
+and execute a playbook
+
+$ ansible-playbook master.yml
+
+##########################################################################################################################################
+##########################################################################################################################################
